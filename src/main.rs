@@ -1,9 +1,12 @@
 use crate::Mach::{Binary, Fat};
 use clap::Parser;
 use goblin::mach::{Mach, MachO, MultiArch, SingleArch};
+use std::ffi::{CStr, OsStr};
 use std::fs;
+use std::io;
+use std::io::Write;
+use std::os::unix::ffi::OsStrExt;
 use std::path::Path;
-use std::ffi::os_str::OsStr;
 
 /// Simple program to list segments and sections of mach-o executables
 #[derive(Parser, Debug)]
@@ -18,9 +21,13 @@ fn process_multi<'a>(multi: MultiArch<'a>) -> Vec<([u8; 16], [u8; 16])> {
         .filter_map(|res| res.ok())
         .filter_map(|s| match s {
             SingleArch::MachO(m) => Some(m),
-            _ => {eprintln!("Passed archive not binary"); None}
+            _ => {
+                eprintln!("Passed archive not binary");
+                None
+            }
         })
-        .flat_map(|m| process_macho(m).into_iter()).collect()
+        .flat_map(|m| process_macho(m).into_iter())
+        .collect()
 }
 
 fn process_macho<'a>(m: MachO<'a>) -> Vec<([u8; 16], [u8; 16])> {
@@ -30,6 +37,29 @@ fn process_macho<'a>(m: MachO<'a>) -> Vec<([u8; 16], [u8; 16])> {
         .filter_map(|res| res.ok())
         .map(|s| (s.0.segname, s.0.sectname))
         .collect()
+}
+
+fn print_array(bytes: [u8; 16]) {
+    let cstr = CStr::from_bytes_until_nul(&bytes)
+        .map(|cstr| unsafe { OsStr::from_encoded_bytes_unchecked(&cstr.to_bytes()) })
+        .unwrap_or_else(|err| {
+            eprintln!("{}", err);
+            unsafe { OsStr::from_encoded_bytes_unchecked(&bytes) }
+        });
+    let _ = io::stdout()
+        .write_all(&cstr.as_bytes())
+        .inspect_err(|err| eprintln!("{}", err));
+}
+
+fn print_tuple(t: ([u8; 16], [u8; 16])) {
+    print_array(t.0);
+    let _ = io::stdout()
+        .write(b",")
+        .inspect_err(|err| eprintln!("{}", err));
+    print_array(t.1);
+    let _ = io::stdout()
+        .write(b"\n")
+        .inspect_err(|err| eprintln!("{}", err));
 }
 
 fn main() {
@@ -42,7 +72,10 @@ fn main() {
         .flat_map(|bytes| match Mach::parse(&bytes) {
             Ok(Fat(m)) => process_multi(m),
             Ok(Binary(b)) => process_macho(b),
-            Err(err) => { eprintln!("{}", err); Vec::new() },
+            Err(err) => {
+                eprintln!("{}", err);
+                Vec::new()
+            }
         })
-        .for_each(|t| unsafe { println!("{},{}",OsStr::from_encoded_bytes_unchecked(&t.0).display(),OsStr::from_encoded_bytes_unchecked(&t.1).display()) });
+        .for_each(print_tuple);
 }
