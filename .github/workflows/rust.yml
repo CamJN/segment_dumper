@@ -33,6 +33,7 @@ jobs:
       run: |
         cargo install cargo-bump
         cargo bump patch --git-tag
+        cargo build
         git push --follow-tags
     - uses: rust-lang/crates-io-auth-action@v1
       id: auth
