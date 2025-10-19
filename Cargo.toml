@@ -1,6 +1,6 @@
 [package]
 name = "segment_dumper"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2024"
 authors = [ "Camden Narzt <segment.dumper@narzt.cam>" ]
 description = "A tool to list the sections and segments from a mach-o binary"
