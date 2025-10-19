@@ -1,8 +1,17 @@
 # segment_dumper
 
+[![Rust](https://github.com/CamJN/segment_dumper/actions/workflows/rust.yml/badge.svg)](https://github.com/CamJN/segment_dumper/actions/workflows/rust.yml)
+
 ### Installing
 
-WIP
+`cargo install segment_dumper`
+
+ or
+
+```
+brew tap CamJN/fixed
+brew install segment-dumper
+```
 
 ### Use
 
