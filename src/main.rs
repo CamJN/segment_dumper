@@ -42,8 +42,8 @@ fn process_macho<'a>(m: MachO<'a>) -> Vec<([u8; 16], [u8; 16])> {
 fn print_array(bytes: [u8; 16]) {
     let cstr = CStr::from_bytes_until_nul(&bytes)
         .map(|cstr| unsafe { OsStr::from_encoded_bytes_unchecked(&cstr.to_bytes()) })
-        .unwrap_or_else(|err| {
-            eprintln!("{}", err);
+        .unwrap_or_else(|_err| {
+            //eprintln!("{}", _err);
             unsafe { OsStr::from_encoded_bytes_unchecked(&bytes) }
         });
     let _ = io::stdout()
