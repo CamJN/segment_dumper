@@ -31,9 +31,8 @@ jobs:
       run: cargo publish --dry-run
     - name: Bump version
       run: |
-        cargo install cargo-bump
+        cargo install --git https://github.com/LevitatingBusinessMan/cargo-bump cargo-bump
         cargo bump patch --git-tag
-        cargo build
         git push --follow-tags
     - uses: rust-lang/crates-io-auth-action@v1
       id: auth
