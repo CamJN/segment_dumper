@@ -1,0 +1,41 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+    - uses: actions/checkout@v5
+    - name: setup-rust
+      run: rustup update stable
+    - name: Build
+      run: cargo build --verbose
+    - name: Sanity Check
+      run: cargo run -- $(cargo metadata --format-version=1 | jq -r .target_directory)/debug/segment_dumper
+    #- name: Run tests
+    #  run: cargo test --verbose
+    - name: Dryrun Publish Crate
+      run: cargo publish --dry-run
+    - name: Bump version
+      run: |
+        cargo install cargo-bump
+        cargo bump patch --git-tag
+        git push --follow-tags
+    - uses: rust-lang/crates-io-auth-action@v1
+      id: auth
+    - run: cargo publish
+      env:
+        CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}

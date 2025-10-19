@@ -2,6 +2,15 @@
 name = "segment_dumper"
 version = "0.1.0"
 edition = "2024"
+authors = [ "Camden Narzt <segment.dumper@narzt.cam>" ]
+description = "A tool to list the sections and segments from a mach-o binary"
+license = "MIT"
+readme = "README.md"
+documentation = "https://github.com/CamJN/segment_dumper"
+homepage = "https://github.com/CamJN/segment_dumper"
+repository = "https://github.com/CamJN/segment_dumper"
+keywords = ["binary","analysis", "mach-o", "macOS", "cli"]
+categories = ["command-line-utilities", "os", "os::macos-apis", "parser-implementations", "security"]
 
 [dependencies]
 clap = { version = "4.5.48", features = ["derive"] }
